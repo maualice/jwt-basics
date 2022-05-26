@@ -22,7 +22,22 @@ const login = async (req, res) => {
 };
 
 const dashboard = async (req, res) => {
-  console.log(req.headers);
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new CustomAPIError('No token provided', 401);
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded);
+  } catch (error) {
+    throw new CustomAPIError('Not authorized to access this route', 401); // si por ejemplo el token expiro
+  }
+
+  //console.log(req.headers);
   const luckyNumber = Math.floor(Math.random() * 100);
   res.status(200).json({
     msg: `Hello,John Doe`,
